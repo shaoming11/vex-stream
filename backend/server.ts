@@ -1,20 +1,16 @@
-import express from "express";
-import cors from "cors";
-import dotenv from 'dotenv'
+import express, { Request, Response } from "express";
+import dotenv from "dotenv";
 
+// configures dotenv to work in your application
 dotenv.config();
-// console.log(process.env);
-
-const PORT = process.env.PORT || 8000;
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT;
 
-app.get('/data', (req, res) => {
-    res.json({message: 'This is CORS-enabled for all origins!'})
+app.get("/", (request: Request, response: Response) => { 
+  response.status(200).send("Hello World");
+}); 
+
+app.listen(PORT, () => { 
+  console.log("Server running at PORT: ", PORT); 
 });
-
-app.listen(8000, () => {
-    console.log(`Server listening on ${PORT}`);
-})
