@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 
 export default function Home() {
-  const [team, setTeam] = useState('1165A')
+  const [team, setTeam] = useState('1165')
 
   const addTeam = () => {
     
