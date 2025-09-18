@@ -6,8 +6,15 @@ export default function Home() {
   const [team, setTeam] = useState('1165')
 
   const getTeam = async () => {
-    const req = await fetch('localhost://5001/users/')
-    console.log(req.json())
+    try {
+      const res = await fetch('http://localhost:5001/users/')
+      if (!res.ok) {
+        throw new Error(`Response status: ${res.status}`)
+      }
+      console.log(res)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   useEffect(() => {

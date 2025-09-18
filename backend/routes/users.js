@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 router.get("/", (req, res) => {
-    res.send("User List")
+    res.send("user list")
 })
 
 router.get("/new", (req, res) => {
