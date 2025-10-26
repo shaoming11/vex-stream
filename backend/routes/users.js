@@ -21,7 +21,7 @@ router.get("/search", async (req, res) => {
 })
 
 router.get("/new", (req, res) => {
-    res.send("User New Form!")
+    res.send("User New Form")
 })
 
 router.post("/create", (req, res) => {
