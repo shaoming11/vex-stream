@@ -4,9 +4,49 @@ import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [team, setTeam] = useState('1165A')
+  const [user, setUser] = useState<{username: string, userId: number} | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const buttonClass = 'border-2 p-5 rounded-xl hover:cursor-pointer'
   const inputClass = 'border-2 p-5 rounded-xl'
+
+  // Check authentication status on page load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/auth/verify', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser({ username: data.username, userId: data.userId });
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.log('User not authenticated');
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const getTeam = async () => {
     try {
@@ -28,9 +68,23 @@ export default function Home() {
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <div className="w-full flex justify-between items-center">
         <h1 id="section-1" className='text-5xl'>VEX Scouting Tool</h1>
-        <a href="/auth" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Login
-        </a>
+        <div className="flex items-center gap-4">
+          {isAuthenticated ? (
+            <>
+              <span className="text-lg">Welcome, {user?.username}!</span>
+              <button 
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <a href="/auth" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Login
+            </a>
+          )}
+        </div>
       </div>
       <input type="text" id="teamNumber" placeholder="Search for a team number" className={inputClass} onChange={(e) => {setTeam(e.target.value)}}/>
       <button onClick={getTeam} className={buttonClass}>get Team Name</button>

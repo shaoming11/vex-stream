@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -8,6 +8,27 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/auth/verify', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          // User is already logged in, redirect to home
+          window.location.href = '/';
+        }
+      } catch (error) {
+        // User is not logged in, stay on auth page
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const buttonClass = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200';
   const inputClass = 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline';
@@ -25,6 +46,7 @@ export default function Auth() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
@@ -32,14 +54,10 @@ export default function Auth() {
 
       if (response.ok) {
         setMessage(data.message);
-        if (isLogin) {
-          localStorage.setItem('userId', data.userId.toString());
-          localStorage.setItem('username', data.username);
-          // Redirect to main page or dashboard
+        if (isLogin || !isLogin) { // Both login and register now set cookies
+          // Cookie is automatically set by the server
+          // Redirect to main page
           window.location.href = '/';
-        } else {
-          setMessage('Registration successful! Please log in.');
-          setIsLogin(true);
         }
       } else {
         setMessage(data.error || 'An error occurred');
