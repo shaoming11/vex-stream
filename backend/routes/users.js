@@ -1,4 +1,5 @@
 const express = require('express')
+
 const router = express.Router()
 
 const VEX_KEY = process.env.VEX_KEY
