@@ -10,6 +10,15 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-producti
 const dbPath = path.join(__dirname, "../vexData.db");
 let db;
 
+/*
+MVP
+- user login system
+- each user has notes on a vex team
+- every user can make a note on a specific vex team and take notes on them
+- every user can also view their notes
+- step 2 would just be make the UI clean
+*/
+
 const connectDb = async () => {
     try {
         db = await open({
@@ -152,4 +161,19 @@ router.get('/verify', (req, res) => {
     }
 }); 
 
-module.exports = router;
+const authenticateToken = (req, res, next) => {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = { id: decoded.userId, username: decoded.username };
+        next();
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token.' });
+    }
+};
+module.exports = { router, authenticateToken };

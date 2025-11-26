@@ -21,8 +21,8 @@ app.get('/', (req, res) => {
   res.render("index", {text: "robot"})
 })
 
-const userRouter = require('./routes/users')
-const authRouter = require('./routes/auth')
+const { router: userRouter } = require('./routes/users')
+const { router: authRouter } = require('./routes/auth')
 
 app.use("/users", userRouter)
 app.use("/auth", authRouter)

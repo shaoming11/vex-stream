@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react'
 
 export default function Home() {
+  const VEX_KEY = process.env.VEX_KEY
+
   const [team, setTeam] = useState('1165A')
   const [user, setUser] = useState<{username: string, userId: number} | null>(null)
+  const [notes, setNotes] = useState([]);
+  const [note, setNote] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const buttonClass = 'border-2 p-5 rounded-xl hover:cursor-pointer'
@@ -50,8 +54,12 @@ export default function Home() {
 
   const getTeam = async () => {
     try {
-      // const res = await fetch('https://www.robotevents.com/api/v2/')
-      const res = await fetch(`http://localhost:5001/users/search`)
+      const res = await fetch('https://www.robotevents.com/api/v2/', {
+          headers: {
+            'Authorization': `Bearer ${VEX_KEY}`,
+            'Content-Type': 'application/json'
+        }
+      })
       if (!res.ok) {
         throw new Error(`Response status: ${res.status}`)
       }
@@ -89,10 +97,46 @@ export default function Home() {
       <input type="text" id="teamNumber" placeholder="Search for a team number" className={inputClass} onChange={(e) => {setTeam(e.target.value)}}/>
       <button onClick={getTeam} className={buttonClass}>get Team Name</button>
       <p id="displayTeam"></p>
-      <button className={buttonClass}>Load Team Info</button>
+      <button className={buttonClass} onClick={async () => {
+        try {
+          const res = await fetch('http://localhost:5001/users/load', {
+            credentials: 'include'
+          });
+          const tempNotes = await res.json();
+          setNotes(tempNotes);
+        } catch (error) {
+          console.error('Failed to load notes:', error);
+        }
+      }}>Load Team Info</button>
       <button className={buttonClass}>Delete Team</button>
-      <input type="text" id="description" placeholder="Enter team description" className={inputClass}/>
-      <button className={buttonClass}>Upload info</button>
+      <input type="text" id="description" placeholder="Enter team description" className={inputClass} onChange={(e) => {setNote(e.target.value)}}/>
+      <button className={buttonClass} onClick={
+        async () => {const res = await fetch(`http://localhost:5001/users/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({note: note, team: team}),
+          credentials: 'include'
+        }); console.log(res.status)}
+      }>Upload info</button>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">Notes</h2>
+        {notes.length > 0 ? (
+          <ul className="space-y-2">
+            {notes.map((note: any) => (
+              <li key={note.id} className="border p-4 rounded">
+                <div><strong>Team:</strong> {note.team}</div>
+                <div><strong>Note:</strong> {note.note}</div>
+                <div className="text-gray-500 text-sm">{new Date(note.created_at).toLocaleDateString()}</div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No notes found. Click "Load Team Info" to fetch your notes.</p>
+        )}
+      </div>
     </div>
   );
   /*
